@@ -11,8 +11,9 @@ const login = require("./routes/login");
 const db = require("./db");
 const cors = require("cors");
 
+const port = process.env.PORT || 3001;
 db().then(() => {
-  server.listen(3001);
+  server.listen(port);
 });
 
 app.use(cors());
