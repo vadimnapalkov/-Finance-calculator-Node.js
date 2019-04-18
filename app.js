@@ -7,6 +7,7 @@ var logger = require("morgan");
 var bodyParser = require("body-parser");
 const register = require("./routes/register");
 const settings = require("./routes/settings");
+const payments = require("./routes/payments");
 const login = require("./routes/login");
 const db = require("./db");
 const cors = require("cors");
@@ -22,6 +23,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("/api/payments/:userid", payments.values);
+app.post("/api/payments/add", payments.addvalue);
 app.post("/api/register", register.submit);
 app.post("/api/login", login.submit);
 app.post("/api/categories/pay", settings.pay);
