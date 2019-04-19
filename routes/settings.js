@@ -63,7 +63,7 @@ exports.deletepayments = (req, res) => {
 
 exports.deleteincoming = (req, res) => {
   const id = req.params.id;
-  Incoming.Category.delete(id).then(() => {
+  Incoming.delete(id).then(() => {
     const deleteinc = { _id: id };
     res.json(deleteinc);
   });
