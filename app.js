@@ -11,6 +11,7 @@ const login = require("./routes/login");
 const db = require("./db");
 const cors = require("cors");
 const payments = require("./routes/payments");
+const income = require("./routes/income");
 
 const port = process.env.PORT || 3001;
 db().then(() => {
@@ -36,6 +37,8 @@ app.put("/api/categories/rename/payments", settings.renamepayments);
 app.put("/api/categories/rename/incoming", settings.renameincoming);
 app.get("/api/payments/:userid", payments.values);
 app.post("/api/payments/add", payments.addvalue);
+app.get("/api/income/:userid", income.values);
+app.post("/api/income/add", income.addvalue);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
