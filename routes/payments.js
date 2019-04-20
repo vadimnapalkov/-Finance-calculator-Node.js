@@ -1,23 +1,48 @@
-const Values = require("../models/value");
+const payments = require("../models/payments");
+const paymentsCategories = require("../models/paymentsCategories");
+
+BuildPaymentsForResponse = (payments, userid, cb) => {
+  paymentsCategories.all(userid).then(paymentsCategory => {
+    let paymentsResponse = [];
+    payments.forEach(payment => {
+      paymentsResponse.push({
+        value: payment.value,
+        categoryname: paymentsCategory.find(
+          category => String(category._id) === payment.categoryId
+        ).name
+      });
+    });
+    cb(null, paymentsResponse);
+  });
+};
 
 exports.values = (req, res) => {
   const userid = req.params.userid;
-  Values.Value.all(userid, "pay").then(values => {
-    payments = [];
-    values.forEach(item => {
-      val = { val: item.val, categoryname: item.categoryname };
-      payments.push(val);
+  let description = "out";
+  payments.all(userid, description).then(payments => {
+    BuildPaymentsForResponse(payments, userid, (err, paymentsResponse) => {
+      if (err) {
+        console.log(err);
+        res.json();
+      }
+      res.json(paymentsResponse);
     });
-    res.json(payments);
   });
 };
 
 exports.addvalue = (req, res) => {
   const userid = req.body.userid;
-  const name = req.body.name;
+  const categoryId = req.body.categoryId;
   const value = req.body.value;
-  Values.Value.add(value, userid, name, "pay").then(() => {
-    const val = { val: value, categoryname: name };
-    res.json(val);
+  let description = "out";
+  payments.add(value, userid, categoryId, description).then(() => {
+    let valueBuild = [{ value: value, categoryId: categoryId }];
+    BuildPaymentsForResponse(valueBuild, userid, (err, valueResponse) => {
+      if (err) {
+        console.log(err);
+        res.json();
+      }
+      res.json(valueResponse);
+    });
   });
 };
