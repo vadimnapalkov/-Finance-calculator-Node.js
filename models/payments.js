@@ -49,14 +49,19 @@ const Payment = {
       .toArray();
   },
 
-  findDate(userid, categoryId, description, date) {
+  findByDate(userid, description, date) {
     return payment()
       .find({
         userId: userid,
-        categoryId: categoryId,
         description: description,
         date: date
       })
+      .toArray();
+  },
+
+  findAllPayments(userid) {
+    return payment()
+      .find({ userId: userid })
       .toArray();
   },
 

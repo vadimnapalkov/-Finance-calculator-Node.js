@@ -1,5 +1,6 @@
 const payments = require("../models/payments");
 const incomingCategories = require("../models/incomingCategories");
+const description = "in";
 
 BuildIncomeForResponse = (incoming, userid, cb) => {
   incomingCategories.all(userid).then(incomingCategory => {
@@ -18,7 +19,6 @@ BuildIncomeForResponse = (incoming, userid, cb) => {
 
 exports.values = (req, res) => {
   const userid = req.params.userid;
-  let description = "in";
   payments.all(userid, description).then(incoming => {
     BuildIncomeForResponse(incoming, userid, (err, incomingResponse) => {
       if (err) {
@@ -30,11 +30,10 @@ exports.values = (req, res) => {
   });
 };
 
-exports.addvalue = (req, res) => {
+exports.addValue = (req, res) => {
   const userid = req.body.userid;
   const categoryId = req.body.categoryId;
   const value = req.body.value;
-  let description = "in";
   payments.add(value, userid, categoryId, description).then(() => {
     let valueBuild = [{ value: value, categoryId: categoryId }];
     BuildIncomeForResponse(valueBuild, userid, (err, valueResponse) => {

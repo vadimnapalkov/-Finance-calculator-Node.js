@@ -12,6 +12,7 @@ const db = require("./db");
 const cors = require("cors");
 const payments = require("./routes/payments");
 const income = require("./routes/income");
+const charts = require("./routes/charts");
 
 const port = process.env.PORT || 3001;
 db().then(() => {
@@ -29,16 +30,18 @@ app.post("/api/register", register.post);
 app.post("/api/login", login.post);
 app.get("/api/categories/payments/:userid", settings.payments);
 app.get("/api/categories/incoming/:userid", settings.incoming);
-app.post("/api/categories/add/payments", settings.addpayments);
-app.post("/api/categories/add/incoming", settings.addincoming);
-app.delete("/api/categories/delete/payments/:id", settings.deletepayments);
-app.delete("/api/categories/delete/incoming/:id", settings.deleteincoming);
-app.put("/api/categories/rename/payments", settings.renamepayments);
-app.put("/api/categories/rename/incoming", settings.renameincoming);
+app.post("/api/categories/add/payments", settings.addPayments);
+app.post("/api/categories/add/incoming", settings.addIncoming);
+app.delete("/api/categories/delete/payments/:id", settings.deletePayments);
+app.delete("/api/categories/delete/incoming/:id", settings.deleteIncoming);
+app.put("/api/categories/rename/payments", settings.renamePayments);
+app.put("/api/categories/rename/incoming", settings.renameIncoming);
 app.get("/api/payments/:userid", payments.values);
-app.post("/api/payments/add", payments.addvalue);
+app.post("/api/payments/add", payments.addValue);
 app.get("/api/income/:userid", income.values);
-app.post("/api/income/add", income.addvalue);
+app.post("/api/income/add", income.addValue);
+app.get("/api/charts", charts.dataForCharts);
+app.get("/api/charts/date/:userid", charts.getDates);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

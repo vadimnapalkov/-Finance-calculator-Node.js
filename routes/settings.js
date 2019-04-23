@@ -1,9 +1,9 @@
-const Payments = require("../models/paymentsCategories");
-const Incoming = require("../models/incomingCategories");
+const paymentsCategories = require("../models/paymentsCategories");
+const incomingCategories = require("../models/incomingCategories");
 
 exports.payments = (req, res) => {
   const userid = req.params.userid;
-  Payments.all(userid).then(payments => {
+  paymentsCategories.all(userid).then(payments => {
     if (payments) {
       const paymentsResponse = JSON.stringify(payments, ["_id", "name"]);
       res.json(paymentsResponse);
@@ -15,7 +15,7 @@ exports.payments = (req, res) => {
 
 exports.incoming = (req, res) => {
   const userid = req.params.userid;
-  Incoming.all(userid).then(incoming => {
+  incomingCategories.all(userid).then(incoming => {
     if (incoming) {
       const incomingResponse = JSON.stringify(incoming, ["_id", "name"]);
       res.json(incomingResponse);
@@ -25,10 +25,10 @@ exports.incoming = (req, res) => {
   });
 };
 
-exports.addpayments = (req, res) => {
+exports.addPayments = (req, res) => {
   const userid = req.body.userid;
   const namepay = req.body.namepay;
-  Payments.add(namepay, userid, (err, payment) => {
+  paymentsCategories.add(namepay, userid, (err, payment) => {
     if (err) console.log(err);
     if (payment) {
       let paymentsResponse = { _id: payment._id, name: payment.name };
@@ -39,10 +39,10 @@ exports.addpayments = (req, res) => {
   });
 };
 
-exports.addincoming = (req, res) => {
+exports.addIncoming = (req, res) => {
   const userid = req.body.userid;
   const nameinc = req.body.nameinc;
-  Incoming.add(nameinc, userid, (err, income) => {
+  incomingCategories.add(nameinc, userid, (err, income) => {
     if (err) console.log(err);
     if (income) {
       let incomeResponse = { _id: income._id, name: income.name };
@@ -53,35 +53,35 @@ exports.addincoming = (req, res) => {
   });
 };
 
-exports.deletepayments = (req, res) => {
+exports.deletePayments = (req, res) => {
   const id = req.params.id;
-  Payments.delete(id).then(() => {
+  paymentsCategories.delete(id).then(() => {
     const deletepay = { _id: id };
     res.json(deletepay);
   });
 };
 
-exports.deleteincoming = (req, res) => {
+exports.deleteIncoming = (req, res) => {
   const id = req.params.id;
-  Incoming.delete(id).then(() => {
+  incomingCategories.delete(id).then(() => {
     const deleteinc = { _id: id };
     res.json(deleteinc);
   });
 };
 
-exports.renamepayments = (req, res) => {
+exports.renamePayments = (req, res) => {
   const id = req.body.id;
   const newname = req.body.newname;
-  Payments.update(id, newname).then(() => {
+  paymentsCategories.update(id, newname).then(() => {
     const renamepay = { _id: id, name: newname };
     res.json(renamepay);
   });
 };
 
-exports.renameincoming = (req, res) => {
+exports.renameIncoming = (req, res) => {
   const id = req.body.id;
   const newname = req.body.newname;
-  Incoming.update(id, newname).then(() => {
+  incomingCategories.update(id, newname).then(() => {
     const renameinc = { _id: id, name: newname };
     res.json(renameinc);
   });
