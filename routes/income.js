@@ -1,46 +1,38 @@
-const payments = require("../models/payments");
-const incomingCategories = require("../models/incomingCategories");
+const payments = require("../controllers/payments");
+const incomingCategories = require("../controllers/incomingCategories");
 const description = "in";
 
-BuildIncomeForResponse = (incoming, userid, cb) => {
+BuildIncomingForResponse = (incoming, userid, cb) => {
   incomingCategories.all(userid).then(incomingCategory => {
     let incomingResponse = [];
     incoming.forEach(income => {
       incomingResponse.push({
         value: income.value,
         categoryname: incomingCategory.find(
-          category => String(category._id) === income.categoryId
+          category => category.id === income.categoryId
         ).name
       });
     });
-    cb(null, incomingResponse);
+    cb(incomingResponse);
   });
 };
 
 exports.values = (req, res) => {
-  const userid = req.params.userid;
-  payments.all(userid, description).then(incoming => {
-    BuildIncomeForResponse(incoming, userid, (err, incomingResponse) => {
-      if (err) {
-        console.log(err);
-        res.json();
-      }
+  const userid = Number(req.params.userid);
+  payments.findPaymentsByDescription(userid, description).then(incoming => {
+    BuildIncomingForResponse(incoming, userid, incomingResponse => {
       res.json(incomingResponse);
     });
   });
 };
 
 exports.addValue = (req, res) => {
-  const userid = req.body.userid;
-  const categoryId = req.body.categoryId;
+  const userid = Number(req.body.userid);
+  const categoryId = Number(req.body.categoryId);
   const value = req.body.value;
   payments.add(value, userid, categoryId, description).then(() => {
     let valueBuild = [{ value: value, categoryId: categoryId }];
-    BuildIncomeForResponse(valueBuild, userid, (err, valueResponse) => {
-      if (err) {
-        console.log(err);
-        res.json();
-      }
+    BuildIncomingForResponse(valueBuild, userid, valueResponse => {
       res.json(valueResponse);
     });
   });

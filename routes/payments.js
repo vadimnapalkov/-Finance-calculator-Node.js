@@ -1,5 +1,5 @@
-const payments = require("../models/payments");
-const paymentsCategories = require("../models/paymentsCategories");
+const payments = require("../controllers/payments");
+const paymentsCategories = require("../controllers/paymentsCategories");
 const description = "out";
 
 BuildPaymentsForResponse = (payments, userid, cb) => {
@@ -9,38 +9,30 @@ BuildPaymentsForResponse = (payments, userid, cb) => {
       paymentsResponse.push({
         value: payment.value,
         categoryname: paymentsCategory.find(
-          category => String(category._id) === payment.categoryId
+          category => category.id === payment.categoryId
         ).name
       });
     });
-    cb(null, paymentsResponse);
+    cb(paymentsResponse);
   });
 };
 
 exports.values = (req, res) => {
-  const userid = req.params.userid;
-  payments.all(userid, description).then(payments => {
-    BuildPaymentsForResponse(payments, userid, (err, paymentsResponse) => {
-      if (err) {
-        console.log(err);
-        res.json();
-      }
+  const userid = Number(req.params.userid);
+  payments.findPaymentsByDescription(userid, description).then(payments => {
+    BuildPaymentsForResponse(payments, userid, paymentsResponse => {
       res.json(paymentsResponse);
     });
   });
 };
 
 exports.addValue = (req, res) => {
-  const userid = req.body.userid;
-  const categoryId = req.body.categoryId;
+  const userid = Number(req.body.userid);
+  const categoryId = Number(req.body.categoryId);
   const value = req.body.value;
   payments.add(value, userid, categoryId, description).then(() => {
     let valueBuild = [{ value: value, categoryId: categoryId }];
-    BuildPaymentsForResponse(valueBuild, userid, (err, valueResponse) => {
-      if (err) {
-        console.log(err);
-        res.json();
-      }
+    BuildPaymentsForResponse(valueBuild, userid, valueResponse => {
       res.json(valueResponse);
     });
   });

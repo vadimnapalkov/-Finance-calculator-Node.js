@@ -1,15 +1,31 @@
-const payments = require("../models/payments");
-const paymentsCategories = require("../models/paymentsCategories");
-const incomingCategories = require("../models/incomingCategories");
+const payments = require("../controllers/payments");
+const paymentsCategories = require("../controllers/paymentsCategories");
+const incomingCategories = require("../controllers/incomingCategories");
 const descriptionPayments = "out";
 const descriptionIncoming = "in";
-
 SearchDates = paymentsForDate => {
   let dates = [];
   paymentsForDate.forEach(payment => {
-    if (dates.indexOf(payment.date) == -1) dates.push(payment.date);
+    createDate =
+      payment.createdAt.getMonth() + 1 + "/" + payment.createdAt.getFullYear();
+    if (dates.indexOf(createDate) == -1) dates.push(createDate);
   });
   return dates;
+};
+BuildParametresForDate = date => {
+  let startdate =
+    date.substring(date.indexOf("/") + 1) +
+    "-" +
+    0 +
+    date.substring(0, date.indexOf("/")) +
+    "-02";
+  let enddate =
+    new Date(startdate).getFullYear() +
+    "-" +
+    0 +
+    (new Date(startdate).getMonth() + 2);
+
+  return { startdate: startdate, enddate: enddate };
 };
 
 BuildDataForResponse = (
@@ -28,8 +44,8 @@ BuildDataForResponse = (
   let sum = 0;
   Categoriespayments.forEach(Category => {
     paymentsByDate.forEach(paymentByDate => {
-      if (paymentByDate.categoryId == String(Category._id))
-        sum = sum + Number(paymentByDate.value);
+      if (paymentByDate.categoryId == Category.id)
+        sum = sum + paymentByDate.value;
     });
     dataForResponse.payments.push(sum);
     dataForResponse.paymentsCategories.push(Category.name);
@@ -37,37 +53,39 @@ BuildDataForResponse = (
   });
   Categoriesincoming.forEach(Category => {
     incomingByDate.forEach(incomeByDate => {
-      if (incomeByDate.categoryId == String(Category._id))
-        sum = sum + Number(incomeByDate.value);
+      if (incomeByDate.categoryId == Category.id)
+        sum = sum + incomeByDate.value;
     });
     dataForResponse.incoming.push(sum);
     dataForResponse.incomingCategories.push(Category.name);
     sum = 0;
   });
-  cb(null, dataForResponse);
+  cb(dataForResponse);
 };
 
 exports.dataForCharts = (req, res) => {
-  const userid = req.query.userid;
+  const userid = Number(req.query.userid);
   const date = req.query.date;
+  dates = BuildParametresForDate(date);
   paymentsCategories.all(userid).then(Categoriespayments => {
     incomingCategories.all(userid).then(Categoriesincoming => {
       payments
-        .findByDate(userid, descriptionPayments, date)
+        .findByDate(userid, descriptionPayments, dates.startdate, dates.enddate)
         .then(paymentsByDate => {
           payments
-            .findByDate(userid, descriptionIncoming, date)
+            .findByDate(
+              userid,
+              descriptionIncoming,
+              dates.startdate,
+              dates.enddate
+            )
             .then(incomingByDate => {
               BuildDataForResponse(
                 Categoriespayments,
                 Categoriesincoming,
                 paymentsByDate,
                 incomingByDate,
-                (err, dataForResponse) => {
-                  if (err) {
-                    console.log(err);
-                    res.json();
-                  }
+                dataForResponse => {
                   const dataJSON = JSON.stringify(dataForResponse);
                   res.json(dataJSON);
                 }
@@ -79,7 +97,7 @@ exports.dataForCharts = (req, res) => {
 };
 
 exports.getDates = (req, res) => {
-  const userid = req.params.userid;
+  const userid = Number(req.params.userid);
   payments.findAllPayments(userid).then(paymentsForDate => {
     let dates = SearchDates(paymentsForDate);
     res.json(dates);

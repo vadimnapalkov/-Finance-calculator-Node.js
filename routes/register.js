@@ -1,23 +1,17 @@
-const User = require("../models/user");
-const paymentsCategories = require("../models/paymentsCategories");
-const incomingCategories = require("../models/incomingCategories");
+const User = require("../controllers/user");
+const paymentsCategories = require("../controllers/paymentsCategories");
+const incomingCategories = require("../controllers/incomingCategories");
 
 exports.post = (req, res) => {
   const data = req.body.user;
-  User.getByName(data.name).then(users => {
-    if (users != null) {
+  User.getByName(data.name, user => {
+    if (user.length != 0) {
       res.json();
     } else {
-      User.save(data, (err, user) => {
-        if (err) console.log(err);
-        User.setUser(user, (err, users) => {
-          if (err) console.log(err);
-          id = String(users._id);
-          paymentsCategories.addCategoryOther(id);
-          incomingCategories.addCategoryOther(id);
-          userResponse = { id: users._id, name: users.name };
-          res.json(userResponse);
-        });
+      User.createUser(data, newUser => {
+        paymentsCategories.addCategoryOther(newUser.dataValues.id);
+        incomingCategories.addCategoryOther(newUser.dataValues.id);
+        res.json(User.toJson(newUser.dataValues));
       });
     }
   });

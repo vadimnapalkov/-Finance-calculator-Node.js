@@ -5,18 +5,18 @@ var server = require("http").createServer(app);
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var bodyParser = require("body-parser");
+const cors = require("cors");
+const login = require("./routes/login");
 const register = require("./routes/register");
 const settings = require("./routes/settings");
-const login = require("./routes/login");
-const db = require("./db");
-const cors = require("cors");
 const payments = require("./routes/payments");
 const income = require("./routes/income");
 const charts = require("./routes/charts");
 
 const port = process.env.PORT || 3001;
-db().then(() => {
-  server.listen(port);
+
+server.listen(port, () => {
+  console.log(`Example app listening on port ${port}!`);
 });
 
 app.use(cors());
@@ -25,7 +25,9 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+require("./config/passport");
 
+app.get("/", login.all);
 app.post("/api/register", register.post);
 app.post("/api/login", login.post);
 app.get("/api/categories/payments/:userid", settings.payments);
@@ -42,7 +44,6 @@ app.get("/api/income/:userid", income.values);
 app.post("/api/income/add", income.addValue);
 app.get("/api/charts", charts.dataForCharts);
 app.get("/api/charts/date/:userid", charts.getDates);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
